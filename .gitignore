@@ -1,0 +1,5 @@
+/.settings
+*.launch
+/Debug
+/mx.scratch
+*.ld
