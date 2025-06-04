@@ -4,6 +4,7 @@
 
 #include "fonts.h"
 #include <stdbool.h>
+#include <main.h>
 
 #define ST7735_MADCTL_MY  0x80
 #define ST7735_MADCTL_MX  0x40
@@ -16,13 +17,6 @@
 /*** Redefine if necessary ***/
 #define ST7735_SPI_PORT hspi1
 extern SPI_HandleTypeDef ST7735_SPI_PORT;
-
-#define ST7735_RES_Pin       GPIO_PIN_0
-#define ST7735_RES_GPIO_Port GPIOA
-#define ST7735_CS_Pin        GPIO_PIN_1
-#define ST7735_CS_GPIO_Port  GPIOA
-#define ST7735_DC_Pin        GPIO_PIN_2
-#define ST7735_DC_GPIO_Port  GPIOA
 
 // AliExpress/eBay 1.8" display, default orientation
 /*
