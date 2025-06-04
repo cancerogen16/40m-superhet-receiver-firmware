@@ -228,16 +228,17 @@ void init() {
     UART_TransmitString("Starting encoder timer...\r\n");
 	HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL);
 
+	UART_TransmitString("Initializing ST7735...\r\n");
+	    ST7735_Init();
+	    ST7735_FillScreen(ST7735_BLACK);
+		displayFrequency();
+
     UART_TransmitString("Initializing Si5351...\r\n");
 	const int32_t correction = 5810;
+
 	si5351_Init(correction);
 	si5351_SetupCLK0(Fbfo+BfoToneShift, SI5351_DRIVE_STRENGTH_4MA);
 	changeFrequency(0);
-
-    UART_TransmitString("Initializing ST7735...\r\n");
-    ST7735_Init();
-    ST7735_FillScreen(ST7735_BLACK);
-	displayFrequency();
 
     UART_TransmitString("Ready!\r\n");
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
@@ -546,21 +547,21 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, ST7735_RES_Pin|ST7735_DC_Pin|ST7735_CS_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, ST7735_RST_Pin|ST7735_CS_Pin|ST7735_DC_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : ST7735_RES_Pin ST7735_DC_Pin */
-  GPIO_InitStruct.Pin = ST7735_RES_Pin|ST7735_DC_Pin;
+  /*Configure GPIO pins : ST7735_RST_Pin ST7735_CS_Pin */
+  GPIO_InitStruct.Pin = ST7735_RST_Pin|ST7735_CS_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : ST7735_CS_Pin */
-  GPIO_InitStruct.Pin = ST7735_CS_Pin;
+  /*Configure GPIO pin : ST7735_DC_Pin */
+  GPIO_InitStruct.Pin = ST7735_DC_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(ST7735_CS_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(ST7735_DC_GPIO_Port, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
