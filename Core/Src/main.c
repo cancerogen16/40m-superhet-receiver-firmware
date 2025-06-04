@@ -43,6 +43,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <string.h>
+#include <stdio.h>
 #include "st7735.h"
 #include "si5351.h"
 /* USER CODE END Includes */
