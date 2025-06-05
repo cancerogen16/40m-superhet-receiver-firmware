@@ -83,30 +83,54 @@ static const uint8_t
     ST7735_DISPON ,    DELAY, //  4: Main screen turn on, no args w/delay
       100 };                  //     100 ms delay
 
+// Helper functions
+
+/**
+ * @brief Select the ST7735 display by setting the CS pin low.
+ */
 static void ST7735_Select() {
     HAL_GPIO_WritePin(ST7735_CS_GPIO_Port, ST7735_CS_Pin, GPIO_PIN_RESET);
 }
 
+/**
+ * @brief Unselect the ST7735 display by setting the CS pin high.
+ */
 void ST7735_Unselect() {
     HAL_GPIO_WritePin(ST7735_CS_GPIO_Port, ST7735_CS_Pin, GPIO_PIN_SET);
 }
 
+/**
+ * @brief Reset the ST7735 display by toggling the RST pin.
+ */
 static void ST7735_Reset() {
     HAL_GPIO_WritePin(ST7735_RST_GPIO_Port, ST7735_RST_Pin, GPIO_PIN_RESET);
     HAL_Delay(5);
     HAL_GPIO_WritePin(ST7735_RST_GPIO_Port, ST7735_RST_Pin, GPIO_PIN_SET);
 }
 
+/**
+ * @brief Send a command to the ST7735 display.
+ * @param cmd Command byte to send.
+ */
 static void ST7735_WriteCommand(uint8_t cmd) {
     HAL_GPIO_WritePin(ST7735_DC_GPIO_Port, ST7735_DC_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(&ST7735_SPI_PORT, &cmd, sizeof(cmd), HAL_MAX_DELAY);
 }
 
+/**
+ * @brief Send data to the ST7735 display.
+ * @param buff Pointer to the data buffer.
+ * @param buff_size Size of the data buffer.
+ */
 static void ST7735_WriteData(uint8_t* buff, size_t buff_size) {
     HAL_GPIO_WritePin(ST7735_DC_GPIO_Port, ST7735_DC_Pin, GPIO_PIN_SET);
     HAL_SPI_Transmit(&ST7735_SPI_PORT, buff, buff_size, HAL_MAX_DELAY);
 }
 
+/**
+ * @brief Execute a sequence of initialization commands.
+ * @param addr Pointer to the command sequence.
+ */
 static void ST7735_ExecuteCommandList(const uint8_t *addr) {
     uint8_t numCommands, numArgs;
     uint16_t ms;
@@ -133,6 +157,13 @@ static void ST7735_ExecuteCommandList(const uint8_t *addr) {
     }
 }
 
+/**
+ * @brief Set the address window for drawing operations.
+ * @param x0 Start X coordinate.
+ * @param y0 Start Y coordinate.
+ * @param x1 End X coordinate.
+ * @param y1 End Y coordinate.
+ */
 static void ST7735_SetAddressWindow(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1) {
     // column address set
     ST7735_WriteCommand(ST7735_CASET);
@@ -149,6 +180,11 @@ static void ST7735_SetAddressWindow(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t 
     ST7735_WriteCommand(ST7735_RAMWR);
 }
 
+// Public API
+
+/**
+ * @brief Initialize the ST7735 display.
+ */
 void ST7735_Init() {
     ST7735_Select();
     ST7735_Reset();
@@ -158,6 +194,12 @@ void ST7735_Init() {
     ST7735_Unselect();
 }
 
+/**
+ * @brief Draw a single pixel on the ST7735 display.
+ * @param x X coordinate of the pixel.
+ * @param y Y coordinate of the pixel.
+ * @param color Color of the pixel (16-bit).
+ */
 void ST7735_DrawPixel(uint16_t x, uint16_t y, uint16_t color) {
     if((x >= ST7735_WIDTH) || (y >= ST7735_HEIGHT))
         return;
@@ -171,6 +213,15 @@ void ST7735_DrawPixel(uint16_t x, uint16_t y, uint16_t color) {
     ST7735_Unselect();
 }
 
+/**
+ * @brief Write a single character to the ST7735 display.
+ * @param x X coordinate of the character.
+ * @param y Y coordinate of the character.
+ * @param ch Character to write.
+ * @param font Font definition structure.
+ * @param color Color of the character (16-bit).
+ * @param bgcolor Background color of the character (16-bit).
+ */
 static void ST7735_WriteChar(uint16_t x, uint16_t y, char ch, FontDef font, uint16_t color, uint16_t bgcolor) {
     uint32_t i, b, j;
 
@@ -207,6 +258,15 @@ static void ST7735_WriteChar(uint16_t x, uint16_t y, char ch, FontDef font, uint
 }
 */
 
+/**
+ * @brief Write a string to the ST7735 display.
+ * @param x X coordinate of the string.
+ * @param y Y coordinate of the string.
+ * @param str String to write.
+ * @param font Font definition structure.
+ * @param color Color of the text (16-bit).
+ * @param bgcolor Background color of the text (16-bit).
+ */
 void ST7735_WriteString(uint16_t x, uint16_t y, const char* str, FontDef font, uint16_t color, uint16_t bgcolor) {
     ST7735_Select();
 
@@ -233,6 +293,14 @@ void ST7735_WriteString(uint16_t x, uint16_t y, const char* str, FontDef font, u
     ST7735_Unselect();
 }
 
+/**
+ * @brief Fill a rectangle on the ST7735 display with a solid color.
+ * @param x X coordinate of the top-left corner.
+ * @param y Y coordinate of the top-left corner.
+ * @param w Width of the rectangle.
+ * @param h Height of the rectangle.
+ * @param color Color of the rectangle (16-bit).
+ */
 void ST7735_FillRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color) {
     // clipping
     if((x >= ST7735_WIDTH) || (y >= ST7735_HEIGHT)) return;
@@ -253,10 +321,22 @@ void ST7735_FillRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16
     ST7735_Unselect();
 }
 
+/**
+ * @brief Fill the entire ST7735 display with a solid color.
+ * @param color Color of the screen (16-bit).
+ */
 void ST7735_FillScreen(uint16_t color) {
     ST7735_FillRectangle(0, 0, ST7735_WIDTH, ST7735_HEIGHT, color);
 }
 
+/**
+ * @brief Draw an image on the ST7735 display.
+ * @param x X coordinate of the top-left corner.
+ * @param y Y coordinate of the top-left corner.
+ * @param w Width of the image.
+ * @param h Height of the image.
+ * @param data Pointer to the image data (16-bit array).
+ */
 void ST7735_DrawImage(uint16_t x, uint16_t y, uint16_t w, uint16_t h, const uint16_t* data) {
     if((x >= ST7735_WIDTH) || (y >= ST7735_HEIGHT)) return;
     if((x + w - 1) >= ST7735_WIDTH) return;
@@ -268,6 +348,10 @@ void ST7735_DrawImage(uint16_t x, uint16_t y, uint16_t w, uint16_t h, const uint
     ST7735_Unselect();
 }
 
+/**
+ * @brief Invert the colors on the ST7735 display.
+ * @param invert True to invert colors, false to restore normal colors.
+ */
 void ST7735_InvertColors(bool invert) {
     ST7735_Select();
     ST7735_WriteCommand(invert ? ST7735_INVON : ST7735_INVOFF);
