@@ -250,6 +250,8 @@ void init() {
 	showMessage("Initialized Si5351!");
 	HAL_Delay(100);
 
+	ST7735_FillScreen(ST7735_BLACK);
+
 	displayFrequency();
 
 	UART_TransmitString("Ready!\r\n");
