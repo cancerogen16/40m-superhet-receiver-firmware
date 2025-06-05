@@ -212,7 +212,7 @@ void displayFrequency() {
 	// A little optimization
 	if (firstCall) {
 		ST7735_WriteString(16, 26 * 1, "7.", Font_16x26, ST7735_GREEN,
-				ST7735_BLACK);
+		ST7735_BLACK);
 		firstCall = false;
 	}
 
@@ -221,6 +221,10 @@ void displayFrequency() {
 			(targetFrequency % 1000000) / 1000, (targetFrequency % 1000) / 10);
 	ST7735_WriteString(16 * 3, 26 * 1, buff, Font_16x26, ST7735_GREEN,
 			ST7735_BLACK);
+}
+
+void showMessage(const char *str) {
+	ST7735_WriteString(1, 1, str, Font_7x10, ST7735_YELLOW, ST7735_BLACK);
 }
 
 void init() {
@@ -234,14 +238,19 @@ void init() {
 	UART_TransmitString("Initializing ST7735...\r\n");
 	ST7735_Init();
 	ST7735_FillScreen(ST7735_BLACK);
-	displayFrequency();
+	showMessage("Initialized ST7735");
 
 	UART_TransmitString("Initializing Si5351...\r\n");
-	const int32_t correction = 5810;
+	showMessage("Initializing Si5351");
 
+	const int32_t correction = 5810;
 	si5351_Init(correction);
 	si5351_SetupCLK0(Fbfo + BfoToneShift, SI5351_DRIVE_STRENGTH_4MA);
 	changeFrequency(0);
+	showMessage("Initialized Si5351");
+	HAL_Delay(100);
+
+	displayFrequency();
 
 	UART_TransmitString("Ready!\r\n");
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
